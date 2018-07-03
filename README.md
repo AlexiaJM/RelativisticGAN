@@ -15,7 +15,7 @@ Code to replicate all analyses from the paper [The relativistic discriminator: a
 * Change all folders locations in fid_script.sh, stable.sh, unstable.sh, GAN_losses_iter.py, GAN_losses_iter_PAC.py
 * Make sure that there are existing folders at the locations you used
 * If you want to use the CAT dataset
-  * Run setting_up_script.sh (I recommend you open it and run lines manually)
+  * Run setting_up_script.sh in same folder as preprocess_cat_dataset.py and your CAT dataset (open and run manually)
   * Move cats folder to your favorite place
   * mv cats_bigger_than_64x64 "your_input_folder_64x64"
   * mv cats_bigger_than_128x128 "your_input_folder_128x128"
