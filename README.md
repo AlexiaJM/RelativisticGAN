@@ -22,12 +22,18 @@ Code to replicate all analyses from the paper [The relativistic discriminator: a
   * mv cats_bigger_than_256x256 "your_input_folder_256x256"
 
 **To run**
-* Open stable.sh and run the lines you want
-* Open unstable.sh and run the lines you want
+* To run models
+  * Use GAN_losses_iter.py (Version you probably will want to use)
+  * Use GAN_losses_iter_PAC.py (Version with PacGAN-2, to use when there is severe mode collapse only)
+* To Replicate
+  * Open stable.sh and run the lines you want
+  * Open unstable.sh and run the lines you want
 
 **Notes**
 
-Installing both Tensorflow and Pytorch in the same computer is a bit annoying. If you just want to generate pictures and you do not care about the Fréchet Inception Distance (FID), you do not need to download Tensorflow.
+If you just want to generate pictures and you do not care about the Fréchet Inception Distance (FID), you do not need to download Tensorflow.
+
+If you don't want to generate cat, nor get the FID, you can skip ahead and focus entirely on "GAN_losses_iter.py".
 
 Although I always used the same seed (seed = 1), keep in mind that your results may be sightly different. Neural networks are notoriously difficult to perfectly replicate. You never know if something that I changed while working on the paper could have affected the randomness in some of my earlier experiments (I did stable experiments first, then unstable experiments for CIFAR-10, and most recently the unstable experiments for CAT). CUDNN is also said to introduce some randomness and I use it. I forgot to put a seed for the tensorflow FID scripts so FIDs may vary by a 2-3 points, but hopefully they shouldn't change much since I used a very large amount of images for the calculations.
 
