@@ -3,7 +3,7 @@
 Code to replicate all analyses from the paper [The relativistic discriminator: a key element missing from standard GAN](https://arxiv.org/abs/1807.00734)
 **Discussion at https://ajolicoeur.wordpress.com/RelativisticGAN.**
 
-**To add Relativism to your own GANs in PyTorch, you can use pieces of code from this example:**
+**To add Relativism to your own GANs in PyTorch, you can use pieces of code from this:**
 
 ```python
 ### Assuming this gets you real and fake data
