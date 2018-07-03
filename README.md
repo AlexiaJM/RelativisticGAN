@@ -49,7 +49,7 @@ BCE_stable = torch.nn.BCEWithLogitsLoss()
 errD = BCE_stable(y_pred - y_pred_fake, y)
 errD.backward()
 
-# Generator loss
+# Generator loss (You may want to resample again from real and fake data)
 errG = BCE_stable(y_pred_fake - y_pred, y)
 errG.backward()
 
@@ -64,7 +64,7 @@ BCE_stable = torch.nn.BCEWithLogitsLoss()
 errD = (BCE_stable(y_pred - torch.mean(y_pred_fake), y) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y2))/2
 errD.backward()
 
-* Generator loss
+* Generator loss (You may want to resample again from real and fake data)
 errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y))/2
 errG.backward()
 
@@ -77,7 +77,7 @@ errG.backward()
 errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred + y) ** 2)
 errD.backward()
 
-# Generator loss
+# Generator loss (You may want to resample again from real and fake data)
 errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y))/2
 errG.backward()
 
@@ -89,8 +89,8 @@ errG.backward()
 # Discriminator loss
 errD = (torch.mean(torch.nn.ReLU()(1.0 - (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 + (y_pred_fake - torch.mean(y_pred)))))/2
 errD.backward()
-
-# Generator loss
+ 
+# Generator loss  (You may want to resample again from real and fake data)
 errG = (torch.mean(torch.nn.ReLU()(1.0 + (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 - (y_pred_fake - torch.mean(y_pred)))))/2
 errG.backward()
 ```
