@@ -60,11 +60,11 @@ errG.backward()
 
 BCE_stable = torch.nn.BCEWithLogitsLoss()
 
-* Discriminator loss
+# Discriminator loss
 errD = (BCE_stable(y_pred - torch.mean(y_pred_fake), y) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y2))/2
 errD.backward()
 
-* Generator loss (You may want to resample again from real and fake data)
+# Generator loss (You may want to resample again from real and fake data)
 errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y))/2
 errG.backward()
 
