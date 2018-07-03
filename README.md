@@ -39,6 +39,7 @@ errD_fake.backward()
 errG = criterion(y_pred_fake, y)
 errG.backward()
 
+
 ### Relativistic Standard GAN
 
 # No activation in generator
