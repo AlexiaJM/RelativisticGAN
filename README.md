@@ -78,7 +78,7 @@ errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((tor
 errD.backward()
 
 # Generator loss (You may want to resample again from real and fake data)
-errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y))/2
+errG = torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred - y) ** 2)
 errG.backward()
 
 
