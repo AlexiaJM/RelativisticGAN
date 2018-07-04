@@ -4,7 +4,7 @@ Code to replicate all analyses from the paper [The relativistic discriminator: a
 **Discussion at https://ajolicoeur.wordpress.com/RelativisticGAN.**
 
 **Notice:**
-There was an error in the paper for RaSGAN and RaLSGAN. I used "torch.mean(y_pred_fake) - y_pred" instead of "y_pred_fake - torch.mean(y_pred)" in the second terms of the equation with the expectation over fake data. RaHingeGAN was correctly coded. This probably won't change much, I'll be rerunning the analyses with the correct coding, it might takes a few weeks since I only have a Geforce 1060. The correct versions were added as Loss_D = 16 and 17 for RaSGAN and RaLSGAN respectively.
+There was an error in the code used to construct RaSGAN and RaLSGAN. I used "torch.mean(y_pred_fake) - y_pred" instead of "y_pred_fake - torch.mean(y_pred)" in the second terms of the equation with the expectation over fake data. RaHingeGAN was correctly coded. This probably won't change much, I'll be rerunning the analyses with the correct coding, it might takes a few weeks since I only have a Geforce 1060. The correct versions were added as Loss_D = 16 and 17 for RaSGAN and RaLSGAN respectively.
 
 **To add Relativism to your own GANs in PyTorch, you can use pieces of code from this:**
 
