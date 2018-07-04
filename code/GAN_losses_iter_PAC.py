@@ -34,7 +34,7 @@ parser.add_argument('--G_load', default='', help='Full path to Generator model t
 parser.add_argument('--D_load', default='', help='Full path to Discriminator model to load (ex: /home/output_folder/run-5/models/D_epoch_11.pth)')
 parser.add_argument('--cuda', type=bool, default=True, help='enables cuda')
 parser.add_argument('--n_gpu', type=int, default=1, help='number of GPUs to use')
-parser.add_argument('--loss_D', type=int, default=1, help='Loss of D, see code for details (1=GAN, 2=LSGAN, 3=WGAN-GP, 4=GAN-GP, 10=RSGAN, 12=RaGAN, 13=HingeGAN, 14=RaHingeGAN, 15=RaLSGAN)')
+parser.add_argument('--loss_D', type=int, default=1, help='Loss of D, see code for details (1=GAN, 2=LSGAN, 3=WGAN-GP, 4=GAN-GP, 10=RSGAN, 12=RaSGAN (incorrect used in paper), 13=HingeGAN, 14=RaHingeGAN, 15=RaLSGAN (incorrect used in paper), 16=RaSGAN, 17=RaLSGAN)')
 parser.add_argument('--Diters', type=int, default=1, help='Number of iterations of D')
 parser.add_argument('--Giters', type=int, default=1, help='Number of iterations of G.')
 parser.add_argument('--penalty', type=float, default=10, help='Gradient penalty parameter for WGAN-GP')
@@ -75,12 +75,16 @@ if param.loss_D == 4:
 if param.loss_D == 10:
 	title = 'RSGAN_'
 if param.loss_D == 12:
+	title = 'RaSGAN_incorrect_' # Used in paper but incorrect
+if param.loss_D == 16:
 	title = 'RaSGAN_'
 if param.loss_D == 13:
 	title = 'HingeGAN_'
 if param.loss_D == 14:
 	title = 'RaHingeGAN_'
 if param.loss_D == 15:
+	title = 'RaLSGAN_incorrect_' # Used in paper but incorrect
+if param.loss_D == 17:
 	title = 'RaLSGAN_'
 
 if param.seed is not None:
@@ -625,6 +629,10 @@ for i in range(param.n_iter):
 				errD = (torch.mean(torch.nn.ReLU()(1.0 - (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 + (y_pred_fake - torch.mean(y_pred)))))/2
 			if param.loss_D == 15: # (y_hat-1)^2 + (y_hat+1)^2
 				errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred + y) ** 2)
+			if param.loss_D == 16:
+				errD = (BCE_stable(y_pred - torch.mean(y_pred_fake), y) + BCE_stable(y_pred_fake - torch.mean(y_pred), y2))/2
+			if param.loss_D == 17: # (y_hat-1)^2 + (y_hat+1)^2
+				errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) + y) ** 2)
 			errD_real = errD
 			errD_fake = errD
 			errD.backward()
@@ -693,6 +701,14 @@ for i in range(param.n_iter):
 		if param.loss_D == 15:
 			y_pred = D(x)
 			errG = torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred - y) ** 2)
+		if param.loss_D == 16:
+			y_pred = D(x)
+			# Non-saturating
+			y2.data.resize_(current_batch_size).fill_(0)
+			errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(y_pred_fake - torch.mean(y_pred), y))/2
+		if param.loss_D == 17:
+			y_pred = D(x)
+			errG = torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) - y) ** 2)
 
 		errG.backward()
 		D_G = y_pred_fake.data.mean()
