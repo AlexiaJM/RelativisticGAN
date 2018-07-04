@@ -42,7 +42,7 @@ errG.backward()
 
 ### Relativistic Standard GAN
 
-# No activation in generator
+# No sigmoid activation in last layer of generator because BCEWithLogitsLoss() already adds it
 
 BCE_stable = torch.nn.BCEWithLogitsLoss()
 
@@ -57,7 +57,7 @@ errG.backward()
 
 ### Relativistic average Standard GAN
 
-# No activation in generator
+# No sigmoid activation in last layer of generator because BCEWithLogitsLoss() already adds it
 
 BCE_stable = torch.nn.BCEWithLogitsLoss()
 
