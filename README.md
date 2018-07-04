@@ -3,6 +3,9 @@
 Code to replicate all analyses from the paper [The relativistic discriminator: a key element missing from standard GAN](https://arxiv.org/abs/1807.00734)
 **Discussion at https://ajolicoeur.wordpress.com/RelativisticGAN.**
 
+**Notice:**
+There was an error in the paper for RaSGAN and RaLSGAN. I used "torch.mean(y_pred_fake) - y_pred" instead of "y_pred_fake - torch.mean(y_pred)" in the second terms of the equation with the expectation over fake data. RaHingeGAN was correctly coded. This probably won't change much, I'll be rerunning the analyses with the correct coding, it might takes a few weeks since I only have a Geforce 1060. The correct versions were added as Loss_D = 16 and 17 for RaSGAN and RaLSGAN respectively.
+
 **To add Relativism to your own GANs in PyTorch, you can use pieces of code from this:**
 
 ```python
@@ -62,11 +65,11 @@ errG.backward()
 BCE_stable = torch.nn.BCEWithLogitsLoss()
 
 # Discriminator loss
-errD = (BCE_stable(y_pred - torch.mean(y_pred_fake), y) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y2))/2
+errD = (BCE_stable(y_pred - torch.mean(y_pred_fake), y) + BCE_stable(y_pred_fake - torch.mean(y_pred), y2))/2
 errD.backward()
 
 # Generator loss (You may want to resample again from real and fake data)
-errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y))/2
+errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(y_pred_fake - torch.mean(y_pred), y))/2
 errG.backward()
 
 
@@ -75,11 +78,11 @@ errG.backward()
 # No activation in generator
 
 # Discriminator loss
-errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred + y) ** 2)
+errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) + y) ** 2)
 errD.backward()
 
 # Generator loss (You may want to resample again from real and fake data)
-errG = torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred - y) ** 2)
+errG = torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) - y) ** 2)
 errG.backward()
 
 
