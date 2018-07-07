@@ -578,7 +578,7 @@ for i in range(param.n_iter):
 			# Visualization of the autograd graph
 			d = pv.make_dot(y_pred, D.state_dict())
 			d.view()
-		
+
 		if param.loss_D in [1,2,3,4,13]:
 			# Train with real data
 			y.data.resize_(current_batch_size).fill_(1)
@@ -734,6 +734,17 @@ for i in range(param.n_iter):
 
 		current_set_images += 1
 
+		# Save models
+		if param.save:
+			if not os.path.exists('%s/models/' % (param.extra_folder)):
+				os.mkdir('%s/models/' % (param.extra_folder))
+			fmt = '%s/models/%s_%02d.pth'
+			torch.save(G.state_dict(), fmt % (param.extra_folder, 'G',current_set_images))
+			torch.save(D.state_dict(), fmt % (param.extra_folder, 'D',current_set_images))
+			s = 'Models saved'
+			print(s)
+			print(s, file=log_output)
+
 		# Delete previously existing images
 		if os.path.exists('%s/%01d/' % (param.extra_folder, current_set_images)):
 			for root, dirs, files in os.walk('%s/%01d/' % (param.extra_folder, current_set_images)):
@@ -756,14 +767,3 @@ for i in range(param.n_iter):
 		del fake_test
 		# Later use this command to get FID of first set:
 		# python fid.py "/home/alexia/Output/Extra/01" "/home/alexia/Datasets/fid_stats_cifar10_train.npz" -i "/home/alexia/Inception" --gpu "0"
-
-		# Save models
-		if param.save:
-			if not os.path.exists('%s/models/' % (param.extra_folder)):
-				os.mkdir('%s/models/' % (param.extra_folder))
-			fmt = '%s/models/%s_%02d.pth'
-			torch.save(G.state_dict(), fmt % (param.extra_folder, 'G',current_set_images))
-			torch.save(D.state_dict(), fmt % (param.extra_folder, 'D',current_set_images))
-			s = 'Models saved'
-			print(s)
-			print(s, file=log_output)
