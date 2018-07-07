@@ -545,6 +545,8 @@ if param.load:
 	optimizerD.load_state_dict(checkpoint['D_optimizer'])
 	decayG.load_state_dict(checkpoint['G_scheduler'])
 	decayD.load_state_dict(checkpoint['D_scheduler'])
+	z_test.copy_(checkpoint['z_test'])
+	del checkpoint
 	print(f'Resumed from epoch {current_set_images}, iter {iter_offset}.')
 else:
 	current_set_images = 0
@@ -755,6 +757,7 @@ for i in range(iter_offset, param.n_iter + iter_offset):
 				'D_optimizer': optimizerD.state_dict(),
 				'G_scheduler': decayG.state_dict(),
 				'D_scheduler': decayD.state_dict(),
+				'z_test': z_test,
 			}, '%s/models/state_%02d.pth' % (param.extra_folder, current_set_images))
 			s = 'Models saved'
 			print(s)
