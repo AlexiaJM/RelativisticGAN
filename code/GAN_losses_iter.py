@@ -552,7 +552,7 @@ print(D)
 print(D, file=log_output)
 
 ## Fitting model
-for i in range(iter_offset, param.n_iter + iter_offset):
+for i in range(iter_offset, param.n_iter):
 
 	# Fake images saved
 	if i % param.print_every == 0:
