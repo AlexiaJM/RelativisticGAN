@@ -541,7 +541,7 @@ if param.load:
 	decayD.load_state_dict(checkpoint['D_scheduler'])
 	z_test.copy_(checkpoint['z_test'])
 	del checkpoint
-	print(f'Resumed from epoch {current_set_images}, iter {iter_offset}.')
+	print(f'Resumed from iteration {current_set_images*param.gen_every}.')
 else:
 	current_set_images = 0
 	iter_offset = 0
