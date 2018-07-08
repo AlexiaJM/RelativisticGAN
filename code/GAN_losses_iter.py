@@ -30,8 +30,7 @@ parser.add_argument('--seed', type=int)
 parser.add_argument('--input_folder', default='/home/alexia/Datasets/Meow_64x64', help='input folder')
 parser.add_argument('--output_folder', default='/home/alexia/Dropbox/Ubuntu_ML/Output/GANlosses', help='output folder')
 parser.add_argument('--inception_folder', default='/home/alexia/Inception', help='Inception model folder (path must exists already, model will be downloaded automatically)')
-parser.add_argument('--G_load', default='', help='Full path to Generator model to load (ex: /home/output_folder/run-5/models/G_epoch_11.pth)')
-parser.add_argument('--D_load', default='', help='Full path to Discriminator model to load (ex: /home/output_folder/run-5/models/D_epoch_11.pth)')
+parser.add_argument('--load', default=None, help='Full path to network state to load (ex: /home/output_folder/run-5/models/state_11.pth)')
 parser.add_argument('--cuda', type=bool, default=True, help='enables cuda')
 parser.add_argument('--n_gpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--loss_D', type=int, default=1, help='Loss of D, see code for details (1=GAN, 2=LSGAN, 3=WGAN-GP, 4=HingeGAN, 5=RSGAN, 6=RaSGAN, 7=RaLSGAN, 8=RaHingeGAN)')
@@ -474,17 +473,6 @@ D.apply(weights_init)
 print("Initialized weights")
 print("Initialized weights", file=log_output)
 
-# Load existing models
-if param.G_load != '':
-	G.load_state_dict(torch.load(param.G_load))
-if param.D_load != '':
-	D.load_state_dict(torch.load(param.D_load))
-
-print(G)
-print(G, file=log_output)
-print(D)
-print(D, file=log_output)
-
 # Criterion
 criterion = torch.nn.BCELoss()
 BCE_stable = torch.nn.BCEWithLogitsLoss()
@@ -540,9 +528,31 @@ optimizerG = torch.optim.Adam(G.parameters(), lr=param.lr_G, betas=(param.beta1,
 decayD = torch.optim.lr_scheduler.ExponentialLR(optimizerD, gamma=1-param.decay)
 decayG = torch.optim.lr_scheduler.ExponentialLR(optimizerG, gamma=1-param.decay)
 
-current_set_images = 0
+# Load existing models
+if param.load:
+	checkpoint = torch.load(param.load)
+	current_set_images = checkpoint['current_set_images']
+	iter_offset = checkpoint['i']
+	G.load_state_dict(checkpoint['G_state'])
+	D.load_state_dict(checkpoint['D_state'])
+	optimizerG.load_state_dict(checkpoint['G_optimizer'])
+	optimizerD.load_state_dict(checkpoint['D_optimizer'])
+	decayG.load_state_dict(checkpoint['G_scheduler'])
+	decayD.load_state_dict(checkpoint['D_scheduler'])
+	z_test.copy_(checkpoint['z_test'])
+	del checkpoint
+	print(f'Resumed from epoch {current_set_images}, iter {iter_offset}.')
+else:
+	current_set_images = 0
+	iter_offset = 0
+
+print(G)
+print(G, file=log_output)
+print(D)
+print(D, file=log_output)
+
 ## Fitting model
-for i in range(param.n_iter):
+for i in range(iter_offset, param.n_iter + iter_offset):
 
 	# Fake images saved
 	if i % param.print_every == 0:
@@ -719,9 +729,17 @@ for i in range(param.n_iter):
 		if param.save:
 			if not os.path.exists('%s/models/' % (param.extra_folder)):
 				os.mkdir('%s/models/' % (param.extra_folder))
-			fmt = '%s/models/%s_%02d.pth'
-			torch.save(G.state_dict(), fmt % (param.extra_folder, 'G',current_set_images))
-			torch.save(D.state_dict(), fmt % (param.extra_folder, 'D',current_set_images))
+			torch.save({
+				'i': i + 1,
+				'current_set_images': current_set_images,
+				'G_state': G.state_dict(),
+				'D_state': D.state_dict(),
+				'G_optimizer': optimizerG.state_dict(),
+				'D_optimizer': optimizerD.state_dict(),
+				'G_scheduler': decayG.state_dict(),
+				'D_scheduler': decayD.state_dict(),
+				'z_test': z_test,
+			}, '%s/models/state_%02d.pth' % (param.extra_folder, current_set_images))
 			s = 'Models saved'
 			print(s)
 			print(s, file=log_output)
