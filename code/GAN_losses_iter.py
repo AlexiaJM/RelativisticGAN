@@ -34,7 +34,7 @@ parser.add_argument('--G_load', default='', help='Full path to Generator model t
 parser.add_argument('--D_load', default='', help='Full path to Discriminator model to load (ex: /home/output_folder/run-5/models/D_epoch_11.pth)')
 parser.add_argument('--cuda', type=bool, default=True, help='enables cuda')
 parser.add_argument('--n_gpu', type=int, default=1, help='number of GPUs to use')
-parser.add_argument('--loss_D', type=int, default=1, help='Loss of D, see code for details (1=GAN, 2=LSGAN, 3=WGAN-GP, 4=GAN-GP, 10=RSGAN, 12=RaSGAN (incorrect used in paper), 13=HingeGAN, 14=RaHingeGAN, 15=RaLSGAN (incorrect used in paper), 16=RaSGAN, 17=RaLSGAN)')
+parser.add_argument('--loss_D', type=int, default=1, help='Loss of D, see code for details (1=GAN, 2=LSGAN, 3=WGAN-GP, 4=HingeGAN, 5=RSGAN, 6=RaSGAN, 7=RaLSGAN, 8=RaHingeGAN)')
 parser.add_argument('--Diters', type=int, default=1, help='Number of iterations of D')
 parser.add_argument('--Giters', type=int, default=1, help='Number of iterations of G.')
 parser.add_argument('--penalty', type=float, default=10, help='Gradient penalty parameter for WGAN-GP')
@@ -48,7 +48,7 @@ parser.add_argument('--show_graph', type=bool, default=False, help='If True, sho
 parser.add_argument('--no_batch_norm_G', type=bool, default=False, help='If True, no batch norm in G.')
 parser.add_argument('--no_batch_norm_D', type=bool, default=False, help='If True, no batch norm in D.')
 parser.add_argument('--Tanh_GD', type=bool, default=False, help='If True, tanh everywhere.')
-parser.add_argument('--grad_penalty', type=bool, default=False, help='If True, use gradient penalty of WGAN-GP but with whichever loss_D chosen. No need to set this true with WGAN-GP and GAN-GP.')
+parser.add_argument('--grad_penalty', type=bool, default=False, help='If True, use gradient penalty of WGAN-GP but with whichever loss_D chosen. No need to set this true with WGAN-GP.')
 parser.add_argument('--arch', type=int, default=0, help='1: standard CNN  for 32x32 images from the Spectral GAN paper, 0:DCGAN with number of layers adjusted based on image size. Some options may be ignored by some architectures.')
 parser.add_argument('--print_every', type=int, default=1000, help='Generate a mini-batch of images at every x iterations (to see how the training progress, you can do it often).')
 parser.add_argument('--save', type=bool, default=True, help='Do we save models, yes or no? It will be saved in extra_folder')
@@ -71,21 +71,15 @@ if param.loss_D == 2:
 if param.loss_D == 3:
 	title = 'WGANGP_'
 if param.loss_D == 4:
-	title = 'GANGP_'
-if param.loss_D == 10:
-	title = 'RSGAN_'
-if param.loss_D == 12:
-	title = 'RaSGAN_incorrect_' # Used in paper but incorrect
-if param.loss_D == 16:
-	title = 'RaSGAN_'
-if param.loss_D == 13:
 	title = 'HingeGAN_'
-if param.loss_D == 14:
-	title = 'RaHingeGAN_'
-if param.loss_D == 15:
-	title = 'RaLSGAN_incorrect_' # Used in paper but incorrect
-if param.loss_D == 17:
+if param.loss_D == 5:
+	title = 'RSGAN_'
+if param.loss_D == 6:
+	title = 'RaSGAN_'
+if param.loss_D == 7:
 	title = 'RaLSGAN_'
+if param.loss_D == 8:
+	title = 'RaHingeGAN_'
 
 if param.seed is not None:
 	title = title + 'seed%i' % param.seed
@@ -315,7 +309,7 @@ if param.arch == 1:
 				output = torch.nn.parallel.data_parallel(self.dense(self.model(input).view(-1, 512 * 4 * 4)).view(-1), input, range(param.n_gpu))
 			else:
 				output = self.dense(self.model(input).view(-1, 512 * 4 * 4)).view(-1)
-			if param.loss_D in [1,4]:
+			if param.loss_D in [1]:
 				output = self.sig(output)
 			#print(output.size())
 			return output
@@ -448,7 +442,7 @@ if param.arch == 0:
 				main.add_module('End-SpectralConv2d', torch.nn.utils.spectral_norm(torch.nn.Conv2d(param.D_h_size * mult, 1, kernel_size=4, stride=1, padding=0, bias=False)))
 			else:
 				main.add_module('End-Conv2d', torch.nn.Conv2d(param.D_h_size * mult, 1, kernel_size=4, stride=1, padding=0, bias=False))
-			if param.loss_D in [1,4]:
+			if param.loss_D in [1]:
 				main.add_module('End-Sigmoid', torch.nn.Sigmoid())
 			# Size = 1 x 1 x 1 (Is a real cat or not?)
 			self.main = main
@@ -579,11 +573,11 @@ for i in range(param.n_iter):
 			# Visualization of the autograd graph
 			d = pv.make_dot(y_pred, D.state_dict())
 			d.view()
-
-		if param.loss_D in [1,2,3,4,13]:
+		
+		if param.loss_D in [1,2,3,4]:
 			# Train with real data
 			y.data.resize_(current_batch_size).fill_(1)
-			if param.loss_D == 1 or param.loss_D == 4 or param.loss_D == 9:
+			if param.loss_D == 1:
 				errD_real = criterion(y_pred, y)
 			if param.loss_D == 2:
 				errD_real = torch.mean((y_pred - y) ** 2)
@@ -591,7 +585,7 @@ for i in range(param.n_iter):
 				#errD_real = torch.mean(a**(1+torch.log(1+a**4)))
 			if param.loss_D == 3:
 				errD_real = -torch.mean(y_pred)
-			if param.loss_D == 13:
+			if param.loss_D == 4:
 				errD_real = torch.mean(torch.nn.ReLU()(1.0 - y_pred))
 			errD_real.backward()
 
@@ -602,7 +596,7 @@ for i in range(param.n_iter):
 			y.data.resize_(current_batch_size).fill_(0)
 			# Detach y_pred from the neural network G and put it inside D
 			y_pred_fake = D(x_fake.detach())
-			if param.loss_D == 1 or param.loss_D == 4:
+			if param.loss_D == 1:
 				errD_fake = criterion(y_pred_fake, y)
 			if param.loss_D == 2:
 				errD_fake = torch.mean((y_pred_fake) ** 2)
@@ -610,7 +604,7 @@ for i in range(param.n_iter):
 				#errD_fake = torch.mean(a**(1+torch.log(1+a**2)))
 			if param.loss_D == 3:
 				errD_fake = torch.mean(y_pred_fake)
-			if param.loss_D == 13:
+			if param.loss_D == 4:
 				errD_fake = torch.mean(torch.nn.ReLU()(1.0 + y_pred_fake))
 			errD_fake.backward()
 			errD = errD_real + errD_fake
@@ -622,23 +616,19 @@ for i in range(param.n_iter):
 			fake = G(z)
 			x_fake.data.resize_(fake.data.size()).copy_(fake.data)
 			y_pred_fake = D(x_fake.detach())
-			if param.loss_D == 10:
+			if param.loss_D == 5:
 				errD = BCE_stable(y_pred - y_pred_fake, y)
-			if param.loss_D == 12:
-				errD = (BCE_stable(y_pred - torch.mean(y_pred_fake), y) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y2))/2
-			if param.loss_D == 14:
-				errD = (torch.mean(torch.nn.ReLU()(1.0 - (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 + (y_pred_fake - torch.mean(y_pred)))))/2
-			if param.loss_D == 15: # (y_hat-1)^2 + (y_hat+1)^2
-				errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred + y) ** 2)
-			if param.loss_D == 16:
+			if param.loss_D == 6:
 				errD = (BCE_stable(y_pred - torch.mean(y_pred_fake), y) + BCE_stable(y_pred_fake - torch.mean(y_pred), y2))/2
-			if param.loss_D == 17: # (y_hat-1)^2 + (y_hat+1)^2
-				errD = torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) + y) ** 2)
+			if param.loss_D == 7: # (y_hat-1)^2 + (y_hat+1)^2
+				errD = (torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) + y) ** 2))/2
+			if param.loss_D == 8:
+				errD = (torch.mean(torch.nn.ReLU()(1.0 - (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 + (y_pred_fake - torch.mean(y_pred)))))/2
 			errD_real = errD
 			errD_fake = errD
 			errD.backward()
 
-		if (param.loss_D in [3,4] or param.grad_penalty):
+		if (param.loss_D in [3] or param.grad_penalty):
 			# Gradient penalty
 			u.data.resize_(current_batch_size, 1, 1, 1)
 			u.uniform_(0, 1)
@@ -670,7 +660,7 @@ for i in range(param.n_iter):
 		fake = G(z)
 		y_pred_fake = D(fake)
 
-		if param.loss_D in [10, 12, 14]:
+		if param.loss_D not in [1, 2, 3, 4]:
 			images = random_sample.__next__()
 			current_batch_size = images.size(0)
 			if param.cuda:
@@ -678,39 +668,30 @@ for i in range(param.n_iter):
 			x.data.resize_as_(images).copy_(images)
 			del images
 
-		if (param.loss_D == 1 or param.loss_D == 4):
+		if (param.loss_D == 1):
 			errG = criterion(y_pred_fake, y)
 		if param.loss_D == 2:
 			errG = torch.mean((y_pred_fake - y) ** 2)
 		if param.loss_D == 3:
 			errG = -torch.mean(y_pred_fake)
-		if param.loss_D == 10:
+		if param.loss_D == 4:
+			errG = -torch.mean(y_pred_fake)
+		if param.loss_D == 5:
 			y_pred = D(x)
 			# Non-saturating
 			errG = BCE_stable(y_pred_fake - y_pred, y)
-		if param.loss_D == 12:
-			y_pred = D(x)
-			# Non-saturating
-			y2.data.resize_(current_batch_size).fill_(0)
-			errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(torch.mean(y_pred_fake) - y_pred, y))/2
-		if param.loss_D == 13:
-			errG = -torch.mean(y_pred_fake)
-		if param.loss_D == 14:
-			y_pred = D(x)
-			# Non-saturating
-			errG = (torch.mean(torch.nn.ReLU()(1.0 + (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 - (y_pred_fake - torch.mean(y_pred)))))/2
-		if param.loss_D == 15:
-			y_pred = D(x)
-			errG = torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((torch.mean(y_pred_fake) - y_pred - y) ** 2)
-		if param.loss_D == 16:
+		if param.loss_D == 6:
 			y_pred = D(x)
 			# Non-saturating
 			y2.data.resize_(current_batch_size).fill_(0)
 			errG = (BCE_stable(y_pred - torch.mean(y_pred_fake), y2) + BCE_stable(y_pred_fake - torch.mean(y_pred), y))/2
-		if param.loss_D == 17:
+		if param.loss_D == 7:
 			y_pred = D(x)
-			errG = torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) - y) ** 2)
-
+			errG = (torch.mean((y_pred - torch.mean(y_pred_fake) + y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) - y) ** 2))/2
+		if param.loss_D == 8:
+			y_pred = D(x)
+			# Non-saturating
+			errG = (torch.mean(torch.nn.ReLU()(1.0 + (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 - (y_pred_fake - torch.mean(y_pred)))))/2
 		errG.backward()
 		D_G = y_pred_fake.data.mean()
 		optimizerG.step()
@@ -734,17 +715,6 @@ for i in range(param.n_iter):
 
 		current_set_images += 1
 
-		# Save models
-		if param.save:
-			if not os.path.exists('%s/models/' % (param.extra_folder)):
-				os.mkdir('%s/models/' % (param.extra_folder))
-			fmt = '%s/models/%s_%02d.pth'
-			torch.save(G.state_dict(), fmt % (param.extra_folder, 'G',current_set_images))
-			torch.save(D.state_dict(), fmt % (param.extra_folder, 'D',current_set_images))
-			s = 'Models saved'
-			print(s)
-			print(s, file=log_output)
-
 		# Delete previously existing images
 		if os.path.exists('%s/%01d/' % (param.extra_folder, current_set_images)):
 			for root, dirs, files in os.walk('%s/%01d/' % (param.extra_folder, current_set_images)):
@@ -767,3 +737,14 @@ for i in range(param.n_iter):
 		del fake_test
 		# Later use this command to get FID of first set:
 		# python fid.py "/home/alexia/Output/Extra/01" "/home/alexia/Datasets/fid_stats_cifar10_train.npz" -i "/home/alexia/Inception" --gpu "0"
+
+		# Save models
+		if param.save:
+			if not os.path.exists('%s/models/' % (param.extra_folder)):
+				os.mkdir('%s/models/' % (param.extra_folder))
+			fmt = '%s/models/%s_%02d.pth'
+			torch.save(G.state_dict(), fmt % (param.extra_folder, 'G',current_set_images))
+			torch.save(D.state_dict(), fmt % (param.extra_folder, 'D',current_set_images))
+			s = 'Models saved'
+			print(s)
+			print(s, file=log_output)
