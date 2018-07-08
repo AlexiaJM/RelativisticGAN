@@ -3,9 +3,6 @@
 Code to replicate all analyses from the paper [The relativistic discriminator: a key element missing from standard GAN](https://arxiv.org/abs/1807.00734)
 **Discussion at https://ajolicoeur.wordpress.com/RelativisticGAN.**
 
-**Notice:**
-There was an error in the code used to construct RaSGAN and RaLSGAN. I used "torch.mean(y_pred_fake) - y_pred" instead of "y_pred_fake - torch.mean(y_pred)" in the second terms of the equation with the expectation over fake data. RaHingeGAN was correctly coded. This probably won't change much, I'll be rerunning the analyses with the correct coding, it might takes a few weeks since I only have a Geforce 1060. The correct versions were added as Loss_D = 16 and 17 for RaSGAN and RaLSGAN respectively.
-
 **To add Relativism to your own GANs in PyTorch, you can use pieces of code from this:**
 
 ```python
@@ -133,7 +130,7 @@ If you just want to generate pictures and you do not care about the Fréchet Inc
 
 If you don't want to generate cat, nor get the FID, you can skip ahead and focus entirely on "GAN_losses_iter.py".
 
-Although I always used the same seed (seed = 1), keep in mind that your results may be sightly different. Neural networks are notoriously difficult to perfectly replicate. You never know if something that I changed while working on the paper could have affected the randomness in some of my earlier experiments (I did stable experiments first, then unstable experiments for CIFAR-10, and most recently the unstable experiments for CAT). CUDNN is also said to introduce some randomness and I use it. I forgot to put a seed for the tensorflow FID scripts so FIDs may vary by a 2-3 points, but hopefully they shouldn't change much since I used a very large amount of images for the calculations.
+Although I always used the same seed (seed = 1), keep in mind that your results may be sightly different. Neural networks are notoriously difficult to perfectly replicate. CUDNN introduce some randomness and slight changes in the code have been made over time. Tensorflow FIDs values may vary a little, but they should still be very stable since the sample size used for the calculations is large. Also, the original code to construct RaSGAN and RaLSGAN used "torch.mean(y_pred_fake) - y_pred" instead of "y_pred_fake - torch.mean(y_pred)" in the second terms of the equation with the expectation over fake data; results are comparable.
 
 # Results
 
