@@ -10,8 +10,13 @@
 
 ## Parameters
 
+# thanks https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+def strToBool(str):
+	return str.lower() in ('true', 'yes', 'on', 't', '1')
+
 import argparse
 parser = argparse.ArgumentParser()
+parser.register('type', 'bool', strToBool)
 parser.add_argument('--image_size', type=int, default=64)
 parser.add_argument('--batch_size', type=int, default=32) # DCGAN paper original value used 128 (32 is generally better to prevent vanishing gradients with SGAN and LSGAN, not important with relativistic GANs)
 parser.add_argument('--n_colors', type=int, default=3)
@@ -24,34 +29,34 @@ parser.add_argument('--n_iter', type=int, default=100000, help='Number of iterat
 parser.add_argument('--beta1', type=float, default=0.5, help='Adam betas[0], DCGAN paper recommends .50 instead of the usual .90')
 parser.add_argument('--beta2', type=float, default=0.999, help='Adam betas[1]')
 parser.add_argument('--decay', type=float, default=0, help='Decay to apply to lr each cycle. decay^n_iter gives the final lr. Ex: .00002 will lead to .13 of lr after 100k cycles')
-parser.add_argument('--SELU', type=bool, default=False, help='Using scaled exponential linear units (SELU) which are self-normalizing instead of ReLU with BatchNorm. Used only in arch=0. This improves stability.')
-parser.add_argument("--NN_conv", type=bool, default=False, help="This approach minimize checkerboard artifacts during training. Used only by arch=0. Uses nearest-neighbor resized convolutions instead of strided convolutions (https://distill.pub/2016/deconv-checkerboard/ and github.com/abhiskk/fast-neural-style).")
+parser.add_argument('--SELU', type='bool', default=False, help='Using scaled exponential linear units (SELU) which are self-normalizing instead of ReLU with BatchNorm. Used only in arch=0. This improves stability.')
+parser.add_argument("--NN_conv", type='bool', default=False, help="This approach minimize checkerboard artifacts during training. Used only by arch=0. Uses nearest-neighbor resized convolutions instead of strided convolutions (https://distill.pub/2016/deconv-checkerboard/ and github.com/abhiskk/fast-neural-style).")
 parser.add_argument('--seed', type=int)
 parser.add_argument('--input_folder', default='/home/alexia/Datasets/Meow_64x64', help='input folder')
 parser.add_argument('--output_folder', default='/home/alexia/Dropbox/Ubuntu_ML/Output/GANlosses', help='output folder')
 parser.add_argument('--inception_folder', default='/home/alexia/Inception', help='Inception model folder (path must exists already, model will be downloaded automatically)')
 parser.add_argument('--load', default=None, help='Full path to network state to load (ex: /home/output_folder/run-5/models/state_11.pth)')
-parser.add_argument('--cuda', type=bool, default=True, help='enables cuda')
+parser.add_argument('--cuda', type='bool', default=True, help='enables cuda')
 parser.add_argument('--n_gpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--loss_D', type=int, default=1, help='Loss of D, see code for details (1=GAN, 2=LSGAN, 3=WGAN-GP, 4=HingeGAN, 5=RSGAN, 6=RaSGAN, 7=RaLSGAN, 8=RaHingeGAN)')
 parser.add_argument('--Diters', type=int, default=1, help='Number of iterations of D')
 parser.add_argument('--Giters', type=int, default=1, help='Number of iterations of G.')
 parser.add_argument('--penalty', type=float, default=10, help='Gradient penalty parameter for WGAN-GP')
-parser.add_argument('--spectral', type=bool, default=False, help='If True, use spectral normalization to make the discriminator Lipschitz. This Will also remove batch norm in the discriminator.')
-parser.add_argument('--spectral_G', type=bool, default=False, help='If True, use spectral normalization to make the generator Lipschitz (Generally only D is spectral, not G). This Will also remove batch norm in the discriminator.')
+parser.add_argument('--spectral', type='bool', default=False, help='If True, use spectral normalization to make the discriminator Lipschitz. This Will also remove batch norm in the discriminator.')
+parser.add_argument('--spectral_G', type='bool', default=False, help='If True, use spectral normalization to make the generator Lipschitz (Generally only D is spectral, not G). This Will also remove batch norm in the discriminator.')
 parser.add_argument('--weight_decay', type=float, default=0, help='L2 regularization weight. Helps convergence but leads to artifacts in images, not recommended.')
 parser.add_argument('--gen_extra_images', type=int, default=50000, help='Generate additional images with random fake cats in calculating FID (Recommended to use the same amount as the size of the dataset; for CIFAR-10 we use 50k, but most people use 10k) It must be a multiple of 100.')
 parser.add_argument('--gen_every', type=int, default=100000, help='Generate additional images with random fake cats every x iterations. Used in calculating FID.')
 parser.add_argument('--extra_folder', default='/home/alexia/Output/Extra', help='Folder for extra photos (different so that my dropbox does not get overwhelmed with 50k pictures)')
-parser.add_argument('--show_graph', type=bool, default=False, help='If True, show gradients graph. Really neat for debugging.')
-parser.add_argument('--no_batch_norm_G', type=bool, default=False, help='If True, no batch norm in G.')
-parser.add_argument('--no_batch_norm_D', type=bool, default=False, help='If True, no batch norm in D.')
-parser.add_argument('--Tanh_GD', type=bool, default=False, help='If True, tanh everywhere.')
-parser.add_argument('--grad_penalty', type=bool, default=False, help='If True, use gradient penalty of WGAN-GP but with whichever loss_D chosen. No need to set this true with WGAN-GP.')
+parser.add_argument('--show_graph', type='bool', default=False, help='If True, show gradients graph. Really neat for debugging.')
+parser.add_argument('--no_batch_norm_G', type='bool', default=False, help='If True, no batch norm in G.')
+parser.add_argument('--no_batch_norm_D', type='bool', default=False, help='If True, no batch norm in D.')
+parser.add_argument('--Tanh_GD', type='bool', default=False, help='If True, tanh everywhere.')
+parser.add_argument('--grad_penalty', type='bool', default=False, help='If True, use gradient penalty of WGAN-GP but with whichever loss_D chosen. No need to set this true with WGAN-GP.')
 parser.add_argument('--arch', type=int, default=0, help='1: standard CNN  for 32x32 images from the Spectral GAN paper, 0:DCGAN with number of layers adjusted based on image size. Some options may be ignored by some architectures.')
 parser.add_argument('--print_every', type=int, default=1000, help='Generate a mini-batch of images at every x iterations (to see how the training progress, you can do it often).')
-parser.add_argument('--save', type=bool, default=True, help='Do we save models, yes or no? It will be saved in extra_folder')
-parser.add_argument('--CIFAR10', type=bool, default=False, help='If True, use CIFAR-10 instead of your own dataset. Make sure image_size is set to 32!')
+parser.add_argument('--save', type='bool', default=True, help='Do we save models, yes or no? It will be saved in extra_folder')
+parser.add_argument('--CIFAR10', type='bool', default=False, help='If True, use CIFAR-10 instead of your own dataset. Make sure image_size is set to 32!')
 parser.add_argument('--CIFAR10_input_folder', default='/home/alexia/Datasets/CIFAR10', help='input folder (automatically downloaded)')
 #parser.add_argument('--CIFAR10_input_folder_images', default='/home/alexia/Datasets/CIFAR10_images', help='input folder (to download on http://pjreddie.com/media/files/cifar.tgz and extract)')
 param = parser.parse_args()
@@ -583,7 +588,7 @@ for i in range(iter_offset, param.n_iter):
 			# Visualization of the autograd graph
 			d = pv.make_dot(y_pred, D.state_dict())
 			d.view()
-		
+
 		if param.loss_D in [1,2,3,4]:
 			# Train with real data
 			y.data.resize_(current_batch_size).fill_(1)
