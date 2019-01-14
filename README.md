@@ -132,6 +132,29 @@ If you don't want to generate cat, nor get the FID, you can skip ahead and focus
 
 Although I always used the same seed (seed = 1), keep in mind that your results may be sightly different. Neural networks are notoriously difficult to perfectly replicate. CUDNN introduce some randomness and slight changes in the code have been made over time. Tensorflow FIDs values may vary a little, but they should still be very stable since the sample size used for the calculations is large. Also, the original code to construct RaSGAN and RaLSGAN used "torch.mean(y_pred_fake) - y_pred" instead of "y_pred_fake - torch.mean(y_pred)" in the second terms of the equation with the expectation over fake data; results are comparable.
 
+## Citation
+
+If you find this code useful please cite us in your work.
+
+Paper introducing Relativistic GANs (https://github.com/AlexiaJM/RelativisticGAN):
+```
+@article{jolicoeur2018relativistic,
+  title={The relativistic discriminator: a key element missing from standard GAN},
+  author={Jolicoeur-Martineau, Alexia},
+  journal={arXiv preprint arXiv:1807.00734},
+  year={2018}
+}
+```
+Paper providing the mathematical fundation for Relativistic GANs (https://github.com/AlexiaJM/relativistic-f-divergences)
+```
+@article{jolicoeur2018rfdiv,
+  title={On Relativistic f-Divergences},
+  author={Jolicoeur-Martineau, Alexia},
+  journal={arXiv preprint arXiv:1901.02474},
+  year={2019}
+}
+```
+
 # Results
 
 **64x64 cats with RaLSGAN (FID = 11.97)**
@@ -165,26 +188,3 @@ Although I always used the same seed (seed = 1), keep in mind that your results 
 **256x256 cats with WGAN-GP (FID > 100)**
 
 ![](/images/WGAN-GP.jpeg)
-
-## Citation
-
-If you find this code useful please cite us in your work.
-
-Paper introducing Relativistic GANs (https://github.com/AlexiaJM/RelativisticGAN):
-```
-@article{jolicoeur2018relativistic,
-  title={The relativistic discriminator: a key element missing from standard GAN},
-  author={Jolicoeur-Martineau, Alexia},
-  journal={arXiv preprint arXiv:1807.00734},
-  year={2018}
-}
-```
-Paper providing the mathematical fundation for Relativistic GANs (https://github.com/AlexiaJM/relativistic-f-divergences)
-```
-@article{jolicoeur2018rfdiv,
-  title={On Relativistic f-Divergences},
-  author={Jolicoeur-Martineau, Alexia},
-  journal={arXiv preprint arXiv:1901.02474},
-  year={2019}
-}
-```
