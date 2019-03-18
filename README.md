@@ -1,7 +1,9 @@
 # Relativistic GAN
 
 Code to replicate all analyses from the paper [The relativistic discriminator: a key element missing from standard GAN](https://arxiv.org/abs/1807.00734)
+
 Now accepted at ICLR 2019: https://openreview.net/forum?id=S1erHoR5t7&noteId=S1erHoR5t7 😸
+
 **Discussion at https://ajolicoeur.wordpress.com/RelativisticGAN.**
 
 **To add Relativism to your own GANs in PyTorch, you can use pieces of code from this:**
