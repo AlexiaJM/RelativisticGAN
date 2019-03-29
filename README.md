@@ -4,6 +4,8 @@ Code to replicate all analyses from the paper [The relativistic discriminator: a
 
 Now accepted at ICLR 2019: https://openreview.net/forum?id=S1erHoR5t7&noteId=S1erHoR5t7 😸
 
+Note: Newer version of pretty much the same code, with extra features is on here: https://github.com/AlexiaJM/relativistic-f-divergences
+
 **Discussion at https://ajolicoeur.wordpress.com/RelativisticGAN.**
 
 **To add Relativism to your own GANs in PyTorch, you can use pieces of code from this:**
