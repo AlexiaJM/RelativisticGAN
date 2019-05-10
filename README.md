@@ -28,7 +28,7 @@ y2.data.resize_(current_batch_size).fill_(0)
 
 ### Standard GAN (non-saturating)
 
-# Use torch.nn.Sigmoid() as last layer in generator
+# Use torch.nn.Sigmoid() as last layer in discriminator
 
 criterion = torch.nn.BCELoss()
 
@@ -47,7 +47,7 @@ errG.backward()
 
 ### Relativistic Standard GAN
 
-# No sigmoid activation in last layer of generator because BCEWithLogitsLoss() already adds it
+# No sigmoid activation in last layer of discriminator because BCEWithLogitsLoss() already adds it
 
 BCE_stable = torch.nn.BCEWithLogitsLoss()
 
@@ -62,7 +62,7 @@ errG.backward()
 
 ### Relativistic average Standard GAN
 
-# No sigmoid activation in last layer of generator because BCEWithLogitsLoss() already adds it
+# No sigmoid activation in last layer of discriminator because BCEWithLogitsLoss() already adds it
 
 BCE_stable = torch.nn.BCEWithLogitsLoss()
 
@@ -77,7 +77,7 @@ errG.backward()
 
 ### Relativistic average LSGAN
 
-# No activation in generator
+# No activation in discriminator
 
 # Discriminator loss
 errD = (torch.mean((y_pred - torch.mean(y_pred_fake) - y) ** 2) + torch.mean((y_pred_fake - torch.mean(y_pred) + y) ** 2))/2
@@ -90,7 +90,7 @@ errG.backward()
 
 ### Relativistic average HingeGAN
 
-# No activation in generator
+# No activation in discriminator
 
 # Discriminator loss
 errD = (torch.mean(torch.nn.ReLU()(1.0 - (y_pred - torch.mean(y_pred_fake)))) + torch.mean(torch.nn.ReLU()(1.0 + (y_pred_fake - torch.mean(y_pred)))))/2
