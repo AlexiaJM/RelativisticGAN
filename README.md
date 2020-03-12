@@ -8,7 +8,31 @@ Note: Newer version of pretty much the same code, with extra features is on here
 
 **Discussion at https://ajolicoeur.wordpress.com/RelativisticGAN.**
 
-**To add Relativism to your own GANs in PyTorch, you can use pieces of code from this:**
+## Citation
+
+If you find this code useful please cite us in your work.
+
+Paper introducing Relativistic GANs (https://github.com/AlexiaJM/RelativisticGAN):
+```
+@article{jolicoeur2018relativistic,
+  title={The relativistic discriminator: a key element missing from standard GAN},
+  author={Jolicoeur-Martineau, Alexia},
+  journal={arXiv preprint arXiv:1807.00734},
+  year={2018}
+}
+```
+Paper providing the mathematical foundations for Relativistic GANs (https://github.com/AlexiaJM/relativistic-f-divergences)
+```
+@article{jolicoeur2018rfdiv,
+  title={On Relativistic f-Divergences},
+  author={Jolicoeur-Martineau, Alexia},
+  journal={arXiv preprint arXiv:1901.02474},
+  year={2019}
+}
+```
+
+
+## To add Relativism to your own GANs in PyTorch, you can use pieces of code from below:
 
 ```python
 ### Assuming this gets you real and fake data
@@ -136,29 +160,6 @@ If you just want to generate pictures and you do not care about the Fréchet Inc
 If you don't want to generate cat, nor get the FID, you can skip ahead and focus entirely on "GAN_losses_iter.py".
 
 Although I always used the same seed (seed = 1), keep in mind that your results may be sightly different. Neural networks are notoriously difficult to perfectly replicate. CUDNN introduce some randomness and slight changes in the code have been made over time. Tensorflow FIDs values may vary a little, but they should still be very stable since the sample size used for the calculations is large. Also, the original code to construct RaSGAN and RaLSGAN used "torch.mean(y_pred_fake) - y_pred" instead of "y_pred_fake - torch.mean(y_pred)" in the second terms of the equation with the expectation over fake data; results are comparable.
-
-## Citation
-
-If you find this code useful please cite us in your work.
-
-Paper introducing Relativistic GANs (https://github.com/AlexiaJM/RelativisticGAN):
-```
-@article{jolicoeur2018relativistic,
-  title={The relativistic discriminator: a key element missing from standard GAN},
-  author={Jolicoeur-Martineau, Alexia},
-  journal={arXiv preprint arXiv:1807.00734},
-  year={2018}
-}
-```
-Paper providing the mathematical fundation for Relativistic GANs (https://github.com/AlexiaJM/relativistic-f-divergences)
-```
-@article{jolicoeur2018rfdiv,
-  title={On Relativistic f-Divergences},
-  author={Jolicoeur-Martineau, Alexia},
-  journal={arXiv preprint arXiv:1901.02474},
-  year={2019}
-}
-```
 
 # Results
 
